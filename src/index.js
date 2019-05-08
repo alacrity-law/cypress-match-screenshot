@@ -1,16 +1,16 @@
-const path = require('path');
+const path = require("path");
 
 const cypressPaths = {
-  SCREENSHOT_FOLDER: 'cypress/match-screenshots',
-  ROOT_FOLDER: ''
+  SCREENSHOT_FOLDER: "cypress/match-screenshots",
+  ROOT_FOLDER: ""
 };
 
 /**
  * Creates unique id strings
  * @return {String}
  */
-function uuid () {
-  return ([ 1e7 ] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (a) =>
+function uuid() {
+  return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, a =>
     (a ^ ((Math.random() * 16) >> (a / 4))).toString(16)
   );
 }
@@ -20,7 +20,7 @@ function uuid () {
  * @param  {String} str
  * @return {String}
  */
-function relPath (str) {
+function relPath(str) {
   return path.join(
     cypressPaths.ROOT_FOLDER,
     cypressPaths.SCREENSHOT_FOLDER,
@@ -35,10 +35,10 @@ function relPath (str) {
  * @param  {String} name
  * @param  {Object} options
  */
-function matchScreenshot (name, options = {}) {
+function matchScreenshot(name, options = {}) {
   const fileName = `${this.test.parent.title} -- ${this.test.title} -- ${name}`;
 
-  console.log('Taking screenshot');
+  console.log("Taking screenshot");
 
   // Ensure that the screenshot folders exist
   cy.exec(`mkdir -p ${cypressPaths.SCREENSHOT_FOLDER}/new`, { log: false });
@@ -53,71 +53,66 @@ function matchScreenshot (name, options = {}) {
 
   const id = uuid();
   let path = null;
-  cy
-    .screenshot(id, {
-      log: false,
-      onAfterScreenshot ($el, props) {
-        // Store path of screenshot that has been taken
-        // This is a reliable way for moving that screenshot file
-        //  in the next step!
-        path = props.path;
-      }
-    })
-    .then(() => {
-      console.log('Move screenshot');
-      const oldPath = `${cypressPaths.SCREENSHOT_FOLDER}/${fileName}.png`;
-      const newPath = `${cypressPaths.SCREENSHOT_FOLDER}/new/${fileName}.png`;
+  cy.screenshot(id, {
+    log: false,
+    capture: "viewport",
+    onAfterScreenshot($el, props) {
+      // Store path of screenshot that has been taken
+      // This is a reliable way for moving that screenshot file
+      //  in the next step!
+      path = props.path;
+    }
+  }).then(() => {
+    console.log("Move screenshot");
+    const oldPath = `${cypressPaths.SCREENSHOT_FOLDER}/${fileName}.png`;
+    const newPath = `${cypressPaths.SCREENSHOT_FOLDER}/new/${fileName}.png`;
 
-      cy.exec(`mv "${path}" "${newPath}"`, {
-        log: false
-      });
+    cy.exec(`mv "${path}" "${newPath}"`, {
+      log: false
+    });
 
-      cy.log('Screenshot taken');
-      cy
-        .readFile(oldPath, 'utf-8', {
-          log: false
-        })
-        .then((value) => {
-          if (value) {
-            cy.log('Matching screenshot...');
-            cy
-              .exec(
-                `cypress-diff-screenshot ` +
-                  `--pathOld="${relPath(`${fileName}.png`)}" ` +
-                  `--pathNew="${relPath(`new/${fileName}.png`)}" ` +
-                  `--target="${relPath(`diff/${fileName}.png`)}" ` +
-                  `--threshold=${options.threshold || '0.005'} ` +
-                  `--thresholdType=${options.thresholdType || ''} `,
-                { log: false }
-              )
-              .then((result) => {
-                console.log(`Matched screenshot - Passed: ${result.stdout}`);
-                const matches = result.stdout === 'Yay';
-                if (Cypress.config('updateScreenshots') || matches) {
-                  cy.exec(
-                    `mv "${cypressPaths.SCREENSHOT_FOLDER}/new/${fileName}.png" ` +
-                      `"${cypressPaths.SCREENSHOT_FOLDER}/${fileName}.png"`,
-                    { log: false }
-                  );
-                  cy.exec(
-                    `rm "${cypressPaths.SCREENSHOT_FOLDER}/diff/${fileName}.png"`,
-                    { log: false }
-                  );
-                }
-                if (!Cypress.config('updateScreenshots')) {
-                  assert.isTrue(matches, 'Screenshots match');
-                }
-              });
-          } else {
-            cy.log('No previous screenshot found to match against!');
+    cy.log("Screenshot taken");
+    cy.readFile(oldPath, "utf-8", {
+      log: false
+    }).then(value => {
+      if (value) {
+        cy.log("Matching screenshot...");
+        cy.exec(
+          `cypress-diff-screenshot ` +
+            `--pathOld="${relPath(`${fileName}.png`)}" ` +
+            `--pathNew="${relPath(`new/${fileName}.png`)}" ` +
+            `--target="${relPath(`diff/${fileName}.png`)}" ` +
+            `--threshold=${options.threshold || "0.005"} ` +
+            `--thresholdType=${options.thresholdType || ""} `,
+          { log: false }
+        ).then(result => {
+          console.log(`Matched screenshot - Passed: ${result.stdout}`);
+          const matches = result.stdout === "Yay";
+          if (Cypress.config("updateScreenshots") || matches) {
             cy.exec(
               `mv "${cypressPaths.SCREENSHOT_FOLDER}/new/${fileName}.png" ` +
                 `"${cypressPaths.SCREENSHOT_FOLDER}/${fileName}.png"`,
               { log: false }
             );
+            cy.exec(
+              `rm "${cypressPaths.SCREENSHOT_FOLDER}/diff/${fileName}.png"`,
+              { log: false }
+            );
+          }
+          if (!Cypress.config("updateScreenshots")) {
+            assert.isTrue(matches, "Screenshots match");
           }
         });
+      } else {
+        cy.log("No previous screenshot found to match against!");
+        cy.exec(
+          `mv "${cypressPaths.SCREENSHOT_FOLDER}/new/${fileName}.png" ` +
+            `"${cypressPaths.SCREENSHOT_FOLDER}/${fileName}.png"`,
+          { log: false }
+        );
+      }
     });
+  });
 }
 
 /**
@@ -125,8 +120,8 @@ function matchScreenshot (name, options = {}) {
  * @param  {String} - optional custom name for command
  * @param  {String} - optional custom root dir path
  */
-function register (
-  commandName = 'matchScreenshot',
+function register(
+  commandName = "matchScreenshot",
   cypressRootFolder = cypressPaths.ROOT_FOLDER
 ) {
   cypressPaths.ROOT_FOLDER = cypressRootFolder;

@@ -10,7 +10,11 @@
     "type": "git",
     "url": "git+https://github.com/julianburr/cypress-match-screenshot.git"
   },
-  "keywords": ["cypress", "screenshot", "diffing"],
+  "keywords": [
+    "cypress",
+    "screenshot",
+    "diffing"
+  ],
   "author": "Julian Burr <hello@julianburr.de>",
   "license": "MIT",
   "bugs": {

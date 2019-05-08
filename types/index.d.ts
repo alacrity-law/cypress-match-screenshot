@@ -1,4 +1,4 @@
-// -- Example Usage: 
+// -- Example Usage:
 // -- cypress/tsconfig.json
 // {
 //   "compilerOptions": {
@@ -7,12 +7,15 @@
 // }
 
 declare namespace Cypress {
-    interface MatchScreenshotOptions {
-        threshold: number;
-        thresholdType: 'pixel' | 'percent';
-    }
+  interface MatchScreenshotOptions {
+    threshold: number;
+    thresholdType: "pixel" | "percent";
+  }
 
-    interface Chainable<Subject = any> {
-        matchScreenshot(name: string, options?: MatchScreenshotOptions): Chainable<null>;
-    }
+  interface Chainable<Subject = any> {
+    matchScreenshot(
+      name: string,
+      options?: MatchScreenshotOptions
+    ): Chainable<null>;
+  }
 }
